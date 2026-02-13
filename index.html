@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Youli Games - 网页实现</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #0f0f14;
+            color: #e0e0e0;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding-bottom: 70px;
+        }
+        
+        /* 状态栏 */
+        .status-bar {
+            background-color: #1a1a22;
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #2a2a35;
+            font-size: 14px;
+        }
+        
+        .time {
+            font-weight: 600;
+        }
+        
+        .network-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .network-speed {
+            color: #8a8a9e;
+            font-size: 13px;
+        }
+        
+        .battery {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .battery-level {
+            width: 20px;
+            height: 10px;
+            border: 1px solid #8a8a9e;
+            border-radius: 2px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .battery-level::after {
+            content: '';
+            position: absolute;
+            top: 1px;
+            left: 1px;
+            width: 62%;
+            height: 8px;
+            background-color: #4cd964;
+            border-radius: 1px;
+        }
+        
+        /* 标题栏 */
+        .header {
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #14141c;
+        }
+        
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: #7a5cff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background-color: #1e1e28;
+            border-radius: 8px;
+            padding: 8px 12px;
+            border: 1px solid #2a2a35;
+            width: 300px;
+        }
+        
+        .search-bar input {
+            background: transparent;
+            border: none;
+            color: #e0e0e0;
+            width: 100%;
+            outline: none;
+            font-size: 14px;
+        }
+        
+        .search-bar .shortcut {
+            background-color: #2a2a35;
+            color: #8a8a9e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+        
+        .menu-icon {
+            font-size: 20px;
+            color: #8a8a9e;
+            cursor: pointer;
+            margin-left: 16px;
+        }
+        
+        /* AI推广广告 */
+        .promo-banner {
+            background: linear-gradient(135deg, #ff7a5c 0%, #ff5c8d 100%);
+            margin: 16px;
+            border-radius: 12px;
+            padding: 20px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .promo-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            transform: rotate(30deg);
+        }
+        
+        .promo-tag {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: inline-block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .promo-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .promo-subtitle {
+            font-size: 16px;
+            margin-bottom: 16px;
+            opacity: 0.9;
+        }
+        
+        .promo-button {
+            background-color: white;
+            color: #ff5c8d;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* 文件目录区域 */
+        .files-section {
+            margin: 24px 16px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .files-container {
+            background-color: #14141c;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #2a2a35;
+        }
+        
+        .files-header {
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            padding: 12px 20px;
+            background-color: #1a1a22;
+            border-bottom: 1px solid #2a2a35;
+            font-weight: 600;
+            color: #8a8a9e;
+        }
+        
+        .file-item {
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            padding: 16px 20px;
+            border-bottom: 1px solid #1e1e28;
+            align-items: center;
+        }
+        
+        .file-item:last-child {
+            border-bottom: none;
+        }
+        
+        .file-name {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .folder-icon {
+            color: #7a5cff;
+        }
+        
+        .file-size {
+            color: #8a8a9e;
+            font-size: 14px;
+        }
+        
+        /* 节点订阅区域 */
+        .subscription-section {
+            margin: 24px 16px;
+        }
+        
+        .subscription-card {
+            background-color: #14141c;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #2a2a35;
+        }
+        
+        .subscription-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #7a5cff;
+        }
+        
+        .subscription-desc {
+            margin-bottom: 16px;
+            color: #b0b0c0;
+            font-size: 14px;
+        }
+        
+        .highlight {
+            color: #ff7a5c;
+            font-weight: 600;
+        }
+        
+        .subscription-url {
+            background-color: #1e1e28;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 16px 0;
+            font-family: monospace;
+            font-size: 14px;
+            color: #7a5cff;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        
+        .steps {
+            margin-top: 20px;
+        }
+        
+        .step {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        .step-number {
+            background-color: #2a2a35;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+        
+        .step-text {
+            font-size: 14px;
+            color: #b0b0c0;
+        }
+        
+        /* 底部导航 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #14141c;
+            border-top: 1px solid #2a2a35;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .url-input {
+            background-color: #1e1e28;
+            border: 1px solid #2a2a35;
+            border-radius: 8px;
+            padding: 10px 16px;
+            color: #e0e0e0;
+            width: 70%;
+            font-size: 14px;
+            outline: none;
+        }
+        
+        .nav-icons {
+            display: flex;
+            gap: 24px;
+        }
+        
+        .nav-icon {
+            font-size: 20px;
+            color: #8a8a9e;
+            cursor: pointer;
+        }
+        
+        .nav-icon.active {
+            color: #7a5cff;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .search-bar {
+                width: 200px;
+            }
+            
+            .promo-title {
+                font-size: 18px;
+            }
+            
+            .promo-subtitle {
+                font-size: 14px;
+            }
+            
+            .bottom-nav {
+                padding: 10px 12px;
+            }
+            
+            .url-input {
+                width: 60%;
+            }
+            
+            .nav-icons {
+                gap: 16px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header {
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
+            }
+            
+            .search-bar {
+                width: 100%;
+            }
+            
+            .promo-banner {
+                padding: 16px;
+            }
+            
+            .promo-title {
+                font-size: 16px;
+            }
+            
+            .section-title {
+                font-size: 16px;
+            }
+            
+            .url-input {
+                width: 55%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div class="time">5:40</div>
+        <div class="network-status">
+            <span class="network-speed">0.45 KB/s</span>
+            <div class="battery">
+                <span>62%</span>
+                <div class="battery-level"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 标题栏 -->
+    <div class="header">
+        <div class="logo">
+            <i class="fas fa-gamepad"></i>
+            <span>YouliGames</span>
+        </div>
+        <div style="display: flex; align-items: center;">
+            <div class="search-bar">
+                <input type="text" placeholder="搜索...">
+                <div class="shortcut">Ctrl K</div>
+            </div>
+            <div class="menu-icon">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 文件目录区域 -->
+    <div class="files-section">
+        <h3 class="section-title">
+            <i class="fas fa-folder"></i>
+            主页
+        </h3>
+        <div class="files-container">
+            <div class="files-header">
+                <div>名称</div>
+                <div>大小</div>
+            </div>
+            <div class="file-item">
+                <div class="file-name">
+                    <i class="fas fa-folder folder-icon"></i>
+                    <span>梓澪の妙妙屋(第三方)</span>
+                </div>
+                <div class="file-size">--</div>
+            </div>
+            <div class="file-item">
+                <div class="file-name">
+                    <i class="fas fa-folder folder-icon"></i>
+                    <span>相关工具下载</span>
+                </div>
+                <div class="file-size">2.3 GB</div>
+            </div>
+            <div class="file-item">
+                <div class="file-name">
+                    <i class="fas fa-folder folder-icon"></i>
+                    <span>米氏烧鸡视频</span>
+                </div>
+                <div class="file-size">15.7 GB</div>
+            </div>
+            <div class="file-item">
+                <div class="file-name">
+                    <i class="fas fa-folder folder-icon"></i>
+                    <span>南+合集</span>
+                </div>
+                <div class="file-size">8.9 GB</div>
+            </div>
+            <div class="file-item">
+                <div class="file-name">
+                    <i class="fas fa-folder folder-icon"></i>
+                    <span>free clash sub</span>
+                </div>
+                <div class="file-size">--</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 节点订阅区域 -->
+    <div class="subscription-section">
+        <div class="subscription-card">
+            <h3 class="subscription-title">自营clash meta/party节点订阅</h3>
+            <p class="subscription-desc">
+                内测免费试用半年！真免费，无套路！<span class="highlight">福建等特殊地区无法使用（SNI严格地区）</span>
+            </p>
+            
+            <div class="subscription-url">地址：https://one.888875.xyz</div>
+            
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-text">注册（邀请码不用填）</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-text">下单柚哩22普惠版【仅支持CLASH META】，选择半年付</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-text">使用优惠码 <span class="highlight">youli2026</span> 即可免费试用半年！</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-text">带上小伙伴们一起来体验吧</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 底部导航栏 -->
+    <div class="bottom-nav">
+        <input type="text" class="url-input" value="114514.1919180.xyz" readonly>
+        <div class="nav-icons">
+            <div class="nav-icon active">
+                <i class="fas fa-home"></i>
+            </div>
+            <div class="nav-icon">
+                <i class="fas fa-search"></i>
+            </div>
+            <div class="nav-icon">
+                <i class="fas fa-download"></i>
+            </div>
+            <div class="nav-icon">
+                <i class="fas fa-user"></i>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 模拟状态栏数据更新
+        function updateStatusBar() {
+            const now = new Date();
+            const timeElement = document.querySelector('.time');
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            timeElement.textContent = `${hours}:${minutes}`;
+            
+            // 模拟网络速度变化
+            const speedElement = document.querySelector('.network-speed');
+            const speed = (Math.random() * 2).toFixed(2);
+            speedElement.textContent = `${speed} KB/s`;
+            
+            // 模拟电池变化
+            const batteryLevel = document.querySelector('.battery-level');
+            const batteryPercent = Math.floor(Math.random() * 30) + 60;
+            batteryLevel.style.width = '20px';
+            batteryLevel.style.height = '10px';
+            batteryLevel.innerHTML = `<span>${batteryPercent}%</span>`;
+            batteryLevel.style.position = 'relative';
+            
+            // 创建电池内部填充
+            const fill = document.createElement('div');
+            fill.style.position = 'absolute';
+            fill.style.top = '1px';
+            fill.style.left = '1px';
+            fill.style.height = '8px';
+            fill.style.width = `${batteryPercent}%`;
+            fill.style.backgroundColor = batteryPercent > 20 ? '#4cd964' : '#ff3b30';
+            fill.style.borderRadius = '1px';
+            batteryLevel.appendChild(fill);
+            
+            // 更新电池百分比文本
+            batteryLevel.previousElementSibling.textContent = `${batteryPercent}%`;
+        }
+        
+        // 初始更新状态栏
+        updateStatusBar();
+        
+        // 每30秒更新一次状态栏
+        setInterval(updateStatusBar, 30000);
+        
+        // 搜索框快捷键功能
+        document.addEventListener('keydown', function(event) {
+            if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+                event.preventDefault();
+                document.querySelector('.search-bar input').focus();
+            }
+        });
+        
+        // 底部导航栏交互
+        document.querySelectorAll('.nav-icon').forEach(icon => {
+            icon.addEventListener('click', function() {
+                document.querySelectorAll('.nav-icon').forEach(i => {
+                    i.classList.remove('active');
+                });
+                this.classList.add('active');
+            });
+        });
+        
+        
+    </script>
+</body>
+</html>
